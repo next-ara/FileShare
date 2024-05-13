@@ -1,0 +1,26 @@
+.text_computer {
+    margin-bottom: 16px;
+    padding-left: 48px;
+    padding-right: 48px;
+    font-size: 20px;
+    font-weight: inherit;
+}
+
+.button_computer {
+    width: 72px;
+    height: 36px;
+    background-color: transparent;
+    border: 1px solid rgba(71, 134, 255, 0.12);
+    border-radius: 8px;
+    color: #4786FF;
+    font-size: 16px;
+    font-weight: inherit;
+    cursor: pointer;
+    outline: none;
+    transition: background-color 0.3s ease;
+    box-shadow: 0 4px 10px rgba(71, 134, 255, 0.12);
+}
+
+.button_computer:active {
+    background-color: rgba(71, 134, 255, 0.2);
+}
