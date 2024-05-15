@@ -14,8 +14,6 @@ import com.koushikdutta.async.http.server.AsyncHttpServerResponse;
 import com.next.module.fileshare.share.FileInfo;
 import com.next.module.fileshare.share.ShareFileInfo;
 import com.next.module.fileshare.share.ShareInfo;
-import com.next.module.fileshare.share.ShareTextInfo;
-import com.next.module.fileshare.share.ShareTool;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
@@ -30,13 +28,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
- * ClassName:网页服务类
+ * ClassName:文件分享服务类
  *
  * @author Afton
  * @time 2023/12/5
  * @auditor
  */
-public class WebService extends Service {
+public class FileShareService extends Service {
 
     //异步Http服务对象
     private CustomAsyncHttpServer server = new CustomAsyncHttpServer();
@@ -58,8 +56,8 @@ public class WebService extends Service {
          *
          * @return 服务对象
          */
-        public WebService getService() {
-            return WebService.this;
+        public FileShareService getService() {
+            return FileShareService.this;
         }
     }
 
@@ -90,17 +88,6 @@ public class WebService extends Service {
         this.fileInfoObjListToMap(fileInfoObjList);
         //启动分享文件服务
         this.startShareFileServer(port);
-    }
-
-    /**
-     * 打开分享文本服务
-     *
-     * @param content 文本内容
-     * @param port    端口号
-     */
-    public void openShareTextServer(String content, int port) {
-        //启动分享文本服务
-        this.startShareTextServer(content, port);
     }
 
     /**
@@ -165,7 +152,7 @@ public class WebService extends Service {
                 }
             }
 
-            ShareInfo shareInfo = new ShareInfo(ShareTool.getInstance().getNickName(), shareFileInfoList);
+            ShareInfo shareInfo = new ShareInfo(ShareConfig.getInstance().getNickName(), shareFileInfoList);
             response.send(new Gson().toJson(shareInfo));
         });
 
@@ -218,33 +205,6 @@ public class WebService extends Service {
             }
 
             response.code(404).send("Not found!");
-        });
-
-        this.server.listen(this.mAsyncServer, port);
-    }
-
-    /**
-     * 启动分享文本服务
-     *
-     * @param content 文本内容
-     * @param port    端口号
-     */
-    private void startShareTextServer(String content, int port) {
-        String dirPath = "share/text/";
-        this.server.get(this.getApplicationContext(), "/js/.*", dirPath);
-        this.server.get(this.getApplicationContext(), "/css/.*", dirPath);
-        this.server.get("/", (asyncHttpServerRequest, asyncHttpServerResponse) -> {
-            try {
-                asyncHttpServerResponse.send(this.getIndexContent(dirPath + "index.html"));
-            } catch (Exception e) {
-                asyncHttpServerResponse.code(500).end();
-            }
-        });
-
-        //请求文本接口
-        this.server.get("/text", (AsyncHttpServerRequest request, AsyncHttpServerResponse response) -> {
-            ShareTextInfo shareTextInfo = new ShareTextInfo(ShareTool.getInstance().getNickName(), content);
-            response.send(new Gson().toJson(shareTextInfo));
         });
 
         this.server.listen(this.mAsyncServer, port);
