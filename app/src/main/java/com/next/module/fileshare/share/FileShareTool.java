@@ -21,20 +21,6 @@ public class FileShareTool {
 
     private static FileShareTool instance;
 
-    //分享监听接口
-    public interface OnShareListener {
-
-        /**
-         * 开启
-         */
-        void onShareOpen();
-
-        /**
-         * 关闭
-         */
-        void onShareClose();
-    }
-
     //是否开启服务
     private boolean isRunning = false;
 
