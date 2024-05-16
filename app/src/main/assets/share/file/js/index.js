@@ -78,21 +78,24 @@ function requestSuccess(isMobile) {
 
     //设置昵称
     setShareInfo(nickName, shareFileInfoList);
-    //设置文件列表
     if (isMobile) {
+        //设置文件列表
         setMobileFileList(shareFileInfoList);
+        //设置悬浮信息
+        setMobileFloatingInfo(shareFileInfoList);
     } else {
+        //设置文件列表
         setComputerFileList(shareFileInfoList);
+        //设置悬浮信息
+        setComputerFloatingInfo(shareFileInfoList);
     }
-    //设置悬浮信息
-    setFloatingInfo(shareFileInfoList);
 }
 
 /**
  * 设置悬浮信息
  * @param list 文件列表
  */
-function setFloatingInfo(list) {
+function setMobileFloatingInfo(list) {
     const floatingText = document.getElementById('floating-tips');
     const floatingButton = document.getElementById('floating-button');
     floatingText.textContent = '接收到' + list.length + '个文件';
@@ -109,8 +112,8 @@ function setFloatingInfo(list) {
     }
 
     window.addEventListener('scroll', function () {
-        var stickyContainer = document.querySelector('.file-share');
-        var floatingHeader = document.querySelector('.floating-info');
+        var stickyContainer = document.querySelector('.file_share_mobile');
+        var floatingHeader = document.querySelector('.floating_info_mobile');
         var stickyRect = stickyContainer.getBoundingClientRect();
 
         // 如果stickyContainer的顶部在视口内，则隐藏悬浮区域
@@ -119,6 +122,41 @@ function setFloatingInfo(list) {
         } else {
             // 否则显示悬浮区域
             floatingHeader.style.display = 'block';
+        }
+    });
+}
+
+/**
+ * 设置悬浮信息
+ * @param list 文件列表
+ */
+function setComputerFloatingInfo(list) {
+    const floatingText = document.getElementById('floating-tips');
+    const floatingButton = document.getElementById('floating-button');
+    floatingText.textContent = '接收到' + list.length + '个文件';
+
+    floatingButton.onclick = function () {
+        for (let i = 0; i < list.length; i++) {
+            var fileShareInfo = list[i];
+            var fileName = fileShareInfo.fileName;
+            var index = fileShareInfo.index;
+
+            //下载文件
+            downloadFile(getDownloadUrl(index), fileName)
+        }
+    }
+
+    window.addEventListener('scroll', function () {
+        var stickyContainer = document.querySelector('.file_share_computer');
+        var floatingHeader = document.querySelector('.floating_info_computer');
+        var stickyRect = stickyContainer.getBoundingClientRect();
+
+        // 如果stickyContainer的顶部在视口内，则隐藏悬浮区域
+        if (stickyRect.bottom >= 0 && stickyRect.bottom <= window.innerHeight) {
+            floatingHeader.style.display = 'none';
+        } else {
+            // 否则显示悬浮区域
+            floatingHeader.style.display = 'flex';
         }
     });
 }
