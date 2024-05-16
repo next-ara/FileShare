@@ -46,7 +46,7 @@ public class FileShareService extends Service {
     private HashMap<String, FileInfo> fileMap = new HashMap<>();
 
     //分享绑定对象
-    private final IBinder iBinder = new ShareBinder();
+    private IBinder iBinder = new ShareBinder();
 
     //分享绑定对象类
     public class ShareBinder extends Binder {
@@ -75,6 +75,13 @@ public class FileShareService extends Service {
         if (this.mAsyncServer != null) {
             this.mAsyncServer.stop();
         }
+
+        this.fileMap.clear();
+
+        this.server = null;
+        this.mAsyncServer = null;
+        this.fileMap = null;
+        this.iBinder = null;
     }
 
     /**

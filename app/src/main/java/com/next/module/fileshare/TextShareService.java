@@ -31,7 +31,7 @@ public class TextShareService extends Service {
     private AsyncServer mAsyncServer = new AsyncServer();
 
     //分享绑定对象
-    private final IBinder iBinder = new ShareBinder();
+    private IBinder iBinder = new ShareBinder();
 
     //分享绑定对象类
     public class ShareBinder extends Binder {
@@ -60,6 +60,10 @@ public class TextShareService extends Service {
         if (this.mAsyncServer != null) {
             this.mAsyncServer.stop();
         }
+
+        this.server = null;
+        this.mAsyncServer = null;
+        this.iBinder = null;
     }
 
     /**
