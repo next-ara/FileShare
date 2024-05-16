@@ -1,33 +1,48 @@
-window.onload = function () {
-    var isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+var requestUrl = window.location.href;
+var win_width = getWinWidth();
+var json_data = {};
 
+window.onload = function () {
     //发起请求
-    startRequest(isMobile);
+    startRequest();
+}
+
+/**
+ * 窗口大小检测
+ */
+function winSizeCheck() {
+    var width = getWinWidth();
+    if (win_width !== width) {
+        win_width = width;
+        //设置Body
+        setBody(isMobile());
+    }
 }
 
 /**
  * 发起请求
- * @param isMobile 是否是移动端
  */
-function startRequest(isMobile) {
-    var requestUrl = window.location.href;
+function startRequest() {
+    var url = requestUrl;
 
-    if (requestUrl.endsWith('/')) {
-        requestUrl = requestUrl + 'info';
+    if (url.endsWith('/')) {
+        url = url + 'info';
     } else {
-        requestUrl = requestUrl + '/info';
+        url = url + '/info';
     }
 
     const xhr = new XMLHttpRequest();
 
     //设置请求方法
-    xhr.open('GET', requestUrl, true);
+    xhr.open('GET', url, true);
 
     xhr.onload = function () {
         if (xhr.status === 200) {
+            json_data = JSON.parse(xhr.responseText);
             //设置body
-            setBody(isMobile);
-            requestSuccess(xhr.responseText)
+            setBody(isMobile());
+            //设置检测窗口大小定时器
+            setInterval("winSizeCheck()", 500);
         }
     };
 
@@ -40,19 +55,23 @@ function startRequest(isMobile) {
  * @param isMobile 是否是移动端
  */
 function setBody(isMobile) {
-    document.body.innerHTML = '<div class="app-download"><div class="app-download-left"><img src="image/ic_app.svg"><div class="app-info"><p class="app-name">Next快传</p><p class="app-des">简洁高效的局域网快传软件</p></div></div><button id="download-app" class="app-download-btn">下载APP</button></div><div class="file-share"><div class="file-share-info"><img src="image/ic_file_share.svg"><p id="nick-name">未知设备<br>向你发送0个文件</p></div><button id="download-all">全部下载</button></div><div class="floating-info"><span id="floating-tips" class="floating-tips">接收到0个文件</span><button id="floating-button" class="floating-button">全部下载</button></div><div id="file-list"></div>';
+    if (isMobile) {
+        document.body.innerHTML = '<div class="app_download"><div class="app_download_left"><img src="image/ic_app.svg"><div class="app_info"><p class="app_name">Next快传</p><p class="app_des">简洁高效的局域网快传软件</p></div></div><button id="download-app" class="app_download_btn">下载APP</button></div><div class="file_share_mobile"><div class="file_share_info_mobile"><img src="image/ic_file_share.svg"><p id="nick-name">未知设备<br>向你发送0个文件</p></div><button id="download-all">全部下载</button></div><div class="floating_info_mobile"><span id="floating-tips" class="floating_tips_mobile">接收到0个文件</span><button id="floating-button" class="floating_button_mobile">全部下载</button></div><div id="file-list" class="file_list_mobile"></div>';
+    } else {
+        document.body.innerHTML = '<div class="file_share_computer"><div class="file_share_info_computer"><img src="image/ic_file_share.svg"><p id="nick-name">未知设备<br>向你发送0个文件</p><button id="download-all">全部下载</button></div></div><div class="floating_info_computer"><div class="float_container_computer"><span id="floating-tips" class="floating_tips_computer">接收到0个文件</span><button id="floating-button" class="floating_button_computer">全部下载</button></div></div><div id="file-list" class="file_list_computer"></div>';
+    }
+
+    //请求成功处理
+    requestSuccess(isMobile)
 }
 
 /**
  * 请求成功处理
- * @param data 数据
+ * @param isMobile 是否是移动端
  */
-function requestSuccess(data) {
-    //获取数据
-    var json = JSON.parse(data);
-
-    const nickName = json.nickName;
-    const shareFileInfoList = json.shareFileInfoList;
+function requestSuccess(isMobile) {
+    const nickName = json_data.nickName;
+    const shareFileInfoList = json_data.shareFileInfoList;
 
     //排序
     shareFileInfoList.sort((a, b) => b.index - a.index);
@@ -60,7 +79,11 @@ function requestSuccess(data) {
     //设置昵称
     setShareInfo(nickName, shareFileInfoList);
     //设置文件列表
-    setFileList(shareFileInfoList);
+    if (isMobile) {
+        setMobileFileList(shareFileInfoList);
+    } else {
+        setComputerFileList(shareFileInfoList);
+    }
     //设置悬浮信息
     setFloatingInfo(shareFileInfoList);
 }
@@ -122,26 +145,28 @@ function setShareInfo(name, list) {
         }
     }
 
-    downloadAppButton.onclick = function () {
-        var downloadUrl = window.location.href;
-        if (downloadUrl.endsWith('/')) {
-            downloadUrl = downloadUrl + 'app';
-        } else {
-            downloadUrl = downloadUrl + '/app';
-        }
+    if (downloadAppButton !== null) {
+        downloadAppButton.onclick = function () {
+            var downloadUrl = requestUrl;
+            if (downloadUrl.endsWith('/')) {
+                downloadUrl = downloadUrl + 'app';
+            } else {
+                downloadUrl = downloadUrl + '/app';
+            }
 
-        downloadFile(downloadUrl, "NextTransfer.apk")
+            downloadFile(downloadUrl, "NextTransfer.apk")
+        }
     }
 }
 
 /**
- * 设置文件列表
+ * 设置手机版文件列表
  * @param list 文件列表
  */
-function setFileList(list) {
+function setMobileFileList(list) {
     //获取文件列表容器
     const listContainer = document.getElementById('file-list');
-    const fileNameWidth = (window.screen.width - 174) + 'px';
+    const fileNameWidth = (getWinWidth() - 174) + 'px';
 
     for (let i = 0; i < list.length; i++) {
         var fileShareInfo = list[i];
@@ -150,26 +175,26 @@ function setFileList(list) {
         var index = fileShareInfo.index;
 
         const newItem = document.createElement('div');
-        newItem.className = 'file-info-container';
+        newItem.className = 'file_info_container_mobile';
 
         const fileInfo = document.createElement('div');
-        fileInfo.className = 'file-info';
+        fileInfo.className = 'file_info_mobile';
 
         const img = document.createElement('img');
         img.src = getFileImage(fileName);
         fileInfo.appendChild(img);
 
         const fileInfoText = document.createElement('div');
-        fileInfoText.className = 'file-info-text';
+        fileInfoText.className = 'file_info_text_mobile';
 
         const fileNameText = document.createElement('p');
-        fileNameText.className = 'file-info-text-name';
+        fileNameText.className = 'file_info_text_name_mobile';
         fileNameText.textContent = fileName;
         fileNameText.style.width = fileNameWidth;
         fileInfoText.appendChild(fileNameText);
 
         const fileSizeText = document.createElement('p');
-        fileSizeText.className = 'file-info-text-size';
+        fileSizeText.className = 'file_info_text_size_mobile';
         fileSizeText.textContent = fileSize;
         fileInfoText.appendChild(fileSizeText);
 
@@ -178,7 +203,65 @@ function setFileList(list) {
         newItem.appendChild(fileInfo);
 
         const downloadButton = document.createElement('button');
-        downloadButton.className = 'download-button';
+        downloadButton.className = 'download_button_mobile';
+        downloadButton.textContent = '下载';
+        downloadButton.dataset.download = index;
+        downloadButton.dataset.fileName = fileName;
+        downloadButton.onclick = function () {
+            downloadFile(getDownloadUrl(this.dataset.download, this.dataset.fileName))
+        };
+
+        newItem.appendChild(downloadButton);
+
+        listContainer.appendChild(newItem);
+    }
+}
+
+/**
+ * 设置电脑版文件列表
+ * @param list 文件列表
+ */
+function setComputerFileList(list) {
+    //获取文件列表容器
+    const listContainer = document.getElementById('file-list');
+    const fileNameWidth = '500px';
+
+    for (let i = 0; i < list.length; i++) {
+        var fileShareInfo = list[i];
+        var fileName = fileShareInfo.fileName;
+        var fileSize = fileShareInfo.fileSize;
+        var index = fileShareInfo.index;
+
+        const newItem = document.createElement('div');
+        newItem.className = 'file_info_container_computer';
+
+        const fileInfo = document.createElement('div');
+        fileInfo.className = 'file_info_computer';
+
+        const img = document.createElement('img');
+        img.src = getFileImage(fileName);
+        fileInfo.appendChild(img);
+
+        const fileInfoText = document.createElement('div');
+        fileInfoText.className = 'file_info_text_computer';
+
+        const fileNameText = document.createElement('p');
+        fileNameText.className = 'file_info_text_name_computer';
+        fileNameText.textContent = fileName;
+        fileNameText.style.width = fileNameWidth;
+        fileInfoText.appendChild(fileNameText);
+
+        const fileSizeText = document.createElement('p');
+        fileSizeText.className = 'file_info_text_size_computer';
+        fileSizeText.textContent = fileSize;
+        fileInfoText.appendChild(fileSizeText);
+
+        fileInfo.appendChild(fileInfoText);
+
+        newItem.appendChild(fileInfo);
+
+        const downloadButton = document.createElement('button');
+        downloadButton.className = 'download_button_computer';
         downloadButton.textContent = '下载';
         downloadButton.dataset.download = index;
         downloadButton.dataset.fileName = fileName;
@@ -250,7 +333,7 @@ function downloadFile(url, fileName) {
  * @returns {string} 下载地址
  */
 function getDownloadUrl(index) {
-    var downloadUrl = window.location.href;
+    var downloadUrl = requestUrl;
     if (downloadUrl.endsWith('/')) {
         downloadUrl = downloadUrl + 'download/' + index;
     } else {
@@ -258,4 +341,20 @@ function getDownloadUrl(index) {
     }
 
     return downloadUrl;
+}
+
+/**
+ * 判断是否是移动端
+ * @returns {boolean} 是否是移动端
+ */
+function isMobile() {
+    return win_width < 700;
+}
+
+/**
+ * 获取窗口宽度
+ * @returns {number} 窗口宽度
+ */
+function getWinWidth() {
+    return window.innerWidth;
 }

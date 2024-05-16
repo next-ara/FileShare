@@ -1,18 +1,28 @@
 var content = '暂无分享的文本';
-var buttonText = "复制"
+var buttonText = "复制";
+var win_width = getWinWidth();
 
 window.onload = function () {
-    var isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-
     //发起请求
-    startRequest(isMobile);
+    startRequest();
+}
+
+/**
+ * 窗口大小检测
+ */
+function winSizeCheck() {
+    var width = getWinWidth();
+    if (win_width !== width) {
+        win_width = width;
+        //设置Body
+        setBody(isMobile());
+    }
 }
 
 /**
  * 发起请求
- * @param isMobile 是否是移动端
  */
-function startRequest(isMobile) {
+function startRequest() {
     var requestUrl = window.location.href;
 
     if (requestUrl.endsWith('/')) {
@@ -35,7 +45,9 @@ function startRequest(isMobile) {
         }
 
         //设置Body
-        setBody(isMobile);
+        setBody(isMobile());
+        //设置检测窗口大小定时器
+        setInterval("winSizeCheck()", 500);
     };
 
     //发送请求
@@ -52,4 +64,20 @@ function setBody(isMobile) {
     } else {
         document.body.innerHTML = '<div id="text" class="text_computer">' + content + '</div><button id="button" class="button_computer" onclick="copyClick()">' + buttonText + '</button>';
     }
+}
+
+/**
+ * 判断是否是移动端
+ * @returns {boolean} 是否是移动端
+ */
+function isMobile() {
+    return win_width < 700;
+}
+
+/**
+ * 获取窗口宽度
+ * @returns {number} 窗口宽度
+ */
+function getWinWidth() {
+    return window.innerWidth;
 }
