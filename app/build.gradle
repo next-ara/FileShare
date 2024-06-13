@@ -15,7 +15,7 @@ afterEvaluate {
                 from components.release
                 groupId = 'com.next.module.fileshare'
                 artifactId = 'FileShare'
-                version = "1.0.1"
+                version = "1.0.2"
             }
         }
     }
@@ -43,6 +43,9 @@ android {
 }
 
 dependencies {
+    //File2
+    implementation 'com.github.next-ara:File2:1.0.2'
+
     implementation "com.squareup.okhttp3:okhttp:3.4.1"
     implementation "com.koushikdutta.async:androidasync:2.+"
     implementation 'com.google.code.gson:gson:2.10.1'

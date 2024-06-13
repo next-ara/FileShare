@@ -1,6 +1,7 @@
 package com.next.module.fileshare.share;
 
-import java.io.File;
+import com.next.module.file2.File2;
+
 import java.io.Serializable;
 
 /**
@@ -19,27 +20,15 @@ public class FileInfo implements Serializable {
     private String filePath;
 
     //文件对象
-    private File file;
+    private File2 file;
 
-    public FileInfo(File file) {
+    public FileInfo(File2 file) {
         this.file = file;
         this.filePath = file.getPath();
         this.fileName = file.getName();
     }
 
-    public FileInfo(String filePath) {
-        this.filePath = filePath;
-        this.file = new File(filePath);
-        this.fileName = file.getName();
-    }
-
-    public FileInfo(String fileName, String filePath) {
-        this.fileName = fileName;
-        this.filePath = filePath;
-        this.file = new File(filePath);
-    }
-
-    public FileInfo(String fileName, String filePath, File file) {
+    public FileInfo(String fileName, String filePath, File2 file) {
         this.fileName = fileName;
         this.filePath = filePath;
         this.file = file;
@@ -53,7 +42,7 @@ public class FileInfo implements Serializable {
         return filePath;
     }
 
-    public File getFile() {
+    public File2 getFile() {
         return file;
     }
 }

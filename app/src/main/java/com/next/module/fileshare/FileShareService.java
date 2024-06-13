@@ -11,6 +11,7 @@ import com.google.gson.Gson;
 import com.koushikdutta.async.AsyncServer;
 import com.koushikdutta.async.http.server.AsyncHttpServerRequest;
 import com.koushikdutta.async.http.server.AsyncHttpServerResponse;
+import com.next.module.file2.File2;
 import com.next.module.fileshare.share.FileInfo;
 import com.next.module.fileshare.share.ShareFileInfo;
 import com.next.module.fileshare.share.ShareInfo;
@@ -18,7 +19,6 @@ import com.next.module.fileshare.share.ShareInfo;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -117,7 +117,7 @@ public class FileShareService extends Service {
 
         for (int i = 0; i < fileInfoObjList.size(); i++) {
             FileInfo fileInfo = fileInfoObjList.get(i);
-            File file = fileInfo.getFile();
+            File2 file = fileInfo.getFile();
             if (file.exists() && file.isFile()) {
                 this.fileMap.put(String.valueOf(i), fileInfo);
             }
@@ -152,7 +152,7 @@ public class FileShareService extends Service {
                     ShareFileInfo shareFileInfo = new ShareFileInfo();
                     shareFileInfo.setIndex(index);
                     shareFileInfo.setFileName(fileInfo.getFileName());
-                    shareFileInfo.setFileSize(this.formetFileSize(this.getSingleFileSize(fileInfo.getFile())));
+                    shareFileInfo.setFileSize(this.formetFileSize(fileInfo.getFile().length()));
                     shareFileInfoList.add(shareFileInfo);
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -173,14 +173,14 @@ public class FileShareService extends Service {
             }
 
             FileInfo fileInfo = this.fileMap.get(index);
-            File file = fileInfo.getFile();
+            File2 file = fileInfo.getFile();
             if (file.exists() && file.isFile()) {
                 try {
                     response.getHeaders().add("Content-Disposition", "attachment;filename=" + URLEncoder.encode(fileInfo.getFileName(), "utf-8"));
-                } catch (UnsupportedEncodingException e) {
+                    response.sendStream(file.openInputStream(), file.length());
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
-                response.sendFile(file);
                 return;
             }
 
@@ -248,27 +248,6 @@ public class FileShareService extends Service {
                 }
             }
         }
-    }
-
-    /**
-     * 获取单个文件大小
-     *
-     * @param file 文件对象
-     * @return 文件大小
-     * @throws IOException
-     */
-    private long getSingleFileSize(File file) throws IOException {
-        long size = 0;
-
-        if (file.exists()) {
-            FileInputStream fis = null;
-            fis = new FileInputStream(file);
-            size = fis.available();
-        } else {
-            file.createNewFile();
-        }
-
-        return size;
     }
 
     /**
